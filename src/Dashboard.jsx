@@ -164,7 +164,7 @@ export default function Dashboard() {
             </Typography>
           ) : (
             <Typography variant='h4'>
-              Tichete curente
+              Tichete active
             </Typography>
           )}
         </Box>
