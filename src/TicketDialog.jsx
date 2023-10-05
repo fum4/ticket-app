@@ -18,7 +18,7 @@ const defaultTimeInterval = 7200000;
 
 const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
   const licenseNoRef = useRef(null);
-  const [ timeInterval, setTimeInterval ] = useState(ticket?.interval || defaultTimeInterval);
+  const [ timeInterval, setTimeInterval ] = useState(ticket?.interval || intervals[0].value);
   const [ licenseNo, setLicenseNo ] = useState(ticket?.license_no || '');
 
   const handleSubmit = async() => {
