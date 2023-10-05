@@ -206,6 +206,28 @@ export default function Dashboard() {
             </Typography>
           )}
         </Box>
+        {showReports && (
+          <Box
+            display='flex'
+            gap={1}
+            sx={{ color: 'black' }}
+            pt={3.5}
+          >
+            <Typography>
+              Total:
+            </Typography>
+            <Typography>
+              <b>
+                {tickets.reduce((acc, { interval }) => {
+                  const { cost } = intervals.find(({value }) => value === +interval);
+                  console.log(cost);
+
+                  return acc + (+cost.slice(0, cost.indexOf(',')));
+                }, 0)} lei
+              </b>
+            </Typography>
+          </Box>
+        )}
         <Stack
           spacing={5}
           sx={{
@@ -214,7 +236,8 @@ export default function Dashboard() {
             flexDirection: 'column',
             overflow: 'scroll',
             whiteSpace: 'nowrap',
-            py: 10,
+            pt: showReports ? 3.5 : 10,
+            pb: 10,
             width: '100vw'
           }}
         >
