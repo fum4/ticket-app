@@ -1,0 +1,157 @@
+import {Box, Button, Card, IconButton, Typography} from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import TicketDialog from "./TicketDialog.tsx";
+import {useEffect, useRef, useState} from "react";
+import {useReactToPrint} from "react-to-print";
+import PrintTemplate from "./PrintTemplate.tsx";
+
+const TicketCard = ({ ticket, onUpdate, onSessionEnd }) => {
+  const [ isUpdateDialogOpen, setUpdateDialogOpen ] = useState(false);
+  const [ currentTime, setCurrentTime ] = useState(Date.now());
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const createdAt = new Date(ticket.created_at).getTime();
+  const remainingTime = createdAt + ticket.interval - currentTime;
+  const remainingTotalMins = Math.ceil(remainingTime > 0 ? remainingTime  / (1000 * 60) : 0);
+  const hours = Math.floor(remainingTotalMins / 60);
+  const minutes = remainingTotalMins % 60;
+  const remainingHoursLabel = hours === 1 ? 'oră' : 'ore';
+  const intervalHours = +ticket.interval / (1000 * 60 * 60);
+  const intervalHoursLabel = intervalHours === 1 ? 'oră' : 'ore';
+  const overdueTotalMins = remainingTime < 0 ?  Math.floor(Math.abs(remainingTime  / (1000 * 60))) : 0;
+  const overdueHours = Math.floor(overdueTotalMins / 60);
+  const overdueMinutes = overdueTotalMins % 60;
+  const overdueHoursLabel = overdueHours === 1 ? 'oră' : 'ore';
+  const leaveAt = new Date(ticket.leave_at).getTime();
+  const overtime = leaveAt - createdAt - ticket.interval;
+  console.log(leaveAt, createdAt, ticket.interval)
+  const overtimeTotalMins = overtime > 0 ? Math.floor(Math.abs(overtime / (1000 * 60))) : 0;
+  const overtimeHours = Math.floor(overtimeTotalMins / 60);
+  const overtimeMinutes = overtimeTotalMins % 60;
+  const overtimeHoursLabel = overtimeHours === 1 ? 'oră' : 'ore';
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const handlePrint= useReactToPrint({
+    content: () => printRef.current
+  });
+
+  return (
+    <>
+      <Card
+        key={ticket.id}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: 300,
+          minHeight: !ticket.leave_at ? 242 : 170,
+          gap: .5,
+          p: 2,
+        }}
+      >
+        <Box
+          display='flex'
+          justifyContent='space-between'
+        >
+          <Typography
+            variant='h6'
+            sx={{ mb: 2 }}
+          >
+            <b>{ticket.license_no.toUpperCase()}</b>
+          </Typography>
+          {!ticket.created_at && (
+            <IconButton
+              color='primary'
+              onClick={() => handlePrint(ticket.id)}
+              sx={{ height: 48, width: 48 }}
+            >
+              <PrintIcon />
+            </IconButton>
+          )}
+        </Box>
+        <Box display='flex' gap={2}>
+          <Typography>Nr. înregistrare:</Typography>
+          <Typography>{ticket.id}</Typography>
+        </Box>
+        <Box display='flex' gap={2}>
+          <Typography>Timp alocat:</Typography>
+          <Typography>{`${intervalHours} ${intervalHoursLabel}`}</Typography>
+        </Box>
+        <Box display='flex' gap={2}>
+          {remainingTime > 0 && !ticket.leave_at ? (
+            <>
+              <Typography>Timp rămas:</Typography>
+              <Typography color={remainingTime < 300000 ? 'error' : 'inherit'}>
+                <b>{`${hours > 0 ? `${hours} ${remainingHoursLabel} ` : ''}${minutes} min`}</b>
+              </Typography>
+            </>
+          ) : ticket.leave_at ? (
+            <>
+              <Typography color={overtime <= 0 ? '#15800b' : 'inherit'}>
+                {`Finalizat${overtime > 0 ? ':' : ''}`}
+              </Typography>
+              {overtime > 0 && (
+                <Typography color={overtime > 0 ? 'error' : 'success'}>
+                  <b>{`(+${overtimeHours > 0 ? `${overtimeHours} ${overtimeHoursLabel} ` : ''}${overtimeMinutes} min)`}</b>
+                </Typography>
+              )}
+            </>
+          ) : (
+            <>
+              <Typography color='error'>
+                TIMP EXPIRAT
+              </Typography>
+              <Typography>
+                <b>{`(+${overdueHours > 0 ? `${overdueHours} ${overdueHoursLabel} ` : ''}${overdueMinutes} min)`}</b>
+              </Typography>
+            </>
+          )}
+        </Box>
+        {!ticket.leave_at && (
+          <Box
+            display='flex'
+            justifyContent='space-between'
+            mt={3}
+          >
+            <Button
+              onClick={() => setUpdateDialogOpen(true)}
+              color='warning'
+              sx={{ mt: 1.5 }}
+            >
+              Modifică
+            </Button>
+            <Button
+              onClick={() => onSessionEnd(ticket.id)}
+              sx={{ mt: 1.5 }}
+              variant='outlined'
+            >
+              Finalizează
+            </Button>
+          </Box>
+        )}
+      </Card>
+      {isUpdateDialogOpen && (
+        <TicketDialog
+          onClose={() => setUpdateDialogOpen(false)}
+          onSuccess={onUpdate}
+          ticket={ticket}
+          type='modify'
+        />
+      )}
+      <div
+        ref={printRef}
+        style={{ position: 'absolute', zIndex: -1 }}
+      >
+        <PrintTemplate ticket={ticket} />
+      </div>
+    </>
+  );
+};
+
+export default TicketCard;
