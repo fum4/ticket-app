@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Session } from '@supabase/supabase-js'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from './supabase.ts';
-import Dashboard from './Dashboard';
+import Dashboard from './Dashboard.jsx';
 
 export default function App() {
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {

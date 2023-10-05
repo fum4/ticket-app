@@ -52,7 +52,7 @@ const intervals = [
 const defaultTimeInterval = 7200000;
 
 const TicketDialog = ({ onClose, onSuccess, ticket, type }) => {
-  const licenseNoRef = useRef<HTMLInputElement>(null);
+  const licenseNoRef = useRef(null);
   const [ timeInterval, setTimeInterval ] = useState(ticket?.interval || defaultTimeInterval);
   const [ licenseNo, setLicenseNo ] = useState(ticket?.license_no || '');
 

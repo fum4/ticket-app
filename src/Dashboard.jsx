@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { supabase } from './supabase.ts';
-import ReportDialog from './ReportDialog.tsx';
-import TicketDialog from './TicketDialog.tsx';
-import TicketCard from "./TicketCard.tsx";
+import ReportDialog from './ReportDialog.jsx';
+import TicketDialog from './TicketDialog.jsx';
+import TicketCard from "./TicketCard.jsx";
 
 const utcOffset = 10800000;
 
@@ -69,7 +69,7 @@ export default function Dashboard() {
     setTickets(data);
   };
 
-  const handleSessionEnd = async(ticketId: string) => {
+  const handleSessionEnd = async(ticketId) => {
     const { data } = await supabase
       .from('tickets')
       .update({ leave_at: new Date(Date.now() + utcOffset).toISOString() })
@@ -190,6 +190,7 @@ export default function Dashboard() {
         </Stack>
       </Box>
       {isAddDialogOpen && (
+        // @ts-ignore
         <TicketDialog
           onClose={() => setAddDialogOpen(false)}
           onSuccess={handleTicketAdd}

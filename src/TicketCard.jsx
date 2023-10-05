@@ -1,14 +1,14 @@
 import {Box, Button, Card, IconButton, Typography} from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
-import TicketDialog from "./TicketDialog.tsx";
+import TicketDialog from "./TicketDialog.jsx";
 import {useEffect, useRef, useState} from "react";
 import {useReactToPrint} from "react-to-print";
-import PrintTemplate from "./PrintTemplate.tsx";
+import PrintTemplate from "./PrintTemplate.jsx";
 
 const TicketCard = ({ ticket, onUpdate, onSessionEnd }) => {
   const [ isUpdateDialogOpen, setUpdateDialogOpen ] = useState(false);
   const [ currentTime, setCurrentTime ] = useState(Date.now());
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef(null);
 
   const createdAt = new Date(ticket.created_at).getTime();
   const remainingTime = createdAt + ticket.interval - currentTime;
@@ -24,7 +24,6 @@ const TicketCard = ({ ticket, onUpdate, onSessionEnd }) => {
   const overdueHoursLabel = overdueHours === 1 ? 'oră' : 'ore';
   const leaveAt = new Date(ticket.leave_at).getTime();
   const overtime = leaveAt - createdAt - ticket.interval;
-  console.log(leaveAt, createdAt, ticket.interval)
   const overtimeTotalMins = overtime > 0 ? Math.floor(Math.abs(overtime / (1000 * 60))) : 0;
   const overtimeHours = Math.floor(overtimeTotalMins / 60);
   const overtimeMinutes = overtimeTotalMins % 60;
