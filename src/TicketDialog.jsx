@@ -20,9 +20,19 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
   const licenseNoRef = useRef(null);
   const [ timeInterval, setTimeInterval ] = useState(ticket?.interval || intervals[0].value);
   const [ licenseNo, setLicenseNo ] = useState(ticket?.license_no || '');
+  const [ error, setError ] = useState(false);
 
   const handleSubmit = async() => {
+    if (licenseNo.length < 7) {
+      setError(true);
+      licenseNoRef.current?.focus();
+
+      return;
+    }
+
     if (timeInterval && licenseNo) {
+      setError(false);
+
       const payload = { interval: timeInterval, license_no: licenseNo };
 
       let data;
@@ -71,14 +81,19 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
       sx={{
         [`& .${dialogClasses.paper}`]: {
           width: 350,
-          height: 400,
+          height: error ? 435 : 400,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         },
       }}
     >
-      <Box width={250} display='flex' flexDirection='column' justifyContent='center'>
+      <Box
+        width={250}
+        display='flex'
+        flexDirection='column'
+        justifyContent='center'
+      >
         <Typography variant='h5' sx={{ mb: 4 }}>
           {type === 'add' ? 'Adaugă tichet' : 'Modifică tichet'}
         </Typography>
@@ -107,10 +122,18 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
             inputRef={licenseNoRef}
             value={licenseNo}
             onChange={(ev) => setLicenseNo(ev.target.value)}
+            color={error ? 'error' : 'primary'}
             variant='outlined'
             label='Nr. înmatriculare'
             sx={{ [`& .${outlinedInputClasses.root}`]: { background: 'white' } }}
           />
+          {error && (
+            <Box display='flex' justifyContent='center'>
+              <Typography color='error'>
+                Nr. de înmatriculare este invalid
+              </Typography>
+            </Box>
+          )}
           <Button
             onClick={handleSubmit}
             variant='contained'
