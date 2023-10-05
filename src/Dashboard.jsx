@@ -125,7 +125,7 @@ export default function Dashboard() {
                 onClick={() => setReportDialogOpen(true)}
                 variant='outlined'
               >
-                Extrage raport
+                Raport
               </Button>
               <Button
                 onClick={() => setAddDialogOpen(true)}
