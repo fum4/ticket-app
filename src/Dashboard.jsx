@@ -212,6 +212,7 @@ export default function Dashboard() {
             gap={1}
             sx={{ color: 'black' }}
             pt={3.5}
+            pb={3.5}
           >
             <Typography>
               Total:
@@ -235,7 +236,7 @@ export default function Dashboard() {
             flexDirection: 'column',
             overflow: 'scroll',
             whiteSpace: 'nowrap',
-            pt: showReports ? 3.5 : 10,
+            pt: showReports ? 0 : 10,
             pb: 10,
             width: '100vw'
           }}
