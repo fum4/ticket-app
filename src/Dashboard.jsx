@@ -90,6 +90,7 @@ export default function Dashboard() {
         gap={2}
         px={10}
         py={2}
+        height='72px'
         className='bg-black'
       >
         {showReports? (
