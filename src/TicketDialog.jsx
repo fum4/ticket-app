@@ -16,10 +16,6 @@ import {supabase} from "./supabase.js";
 
 const intervals = [
   {
-    name: '2 min',
-    value: 120000,
-  },
-  {
     name: '5 ore',
     value: 18000000,
   },
