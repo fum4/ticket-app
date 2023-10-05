@@ -19,37 +19,37 @@ const utcOffset = 10800000;
 
 const intervals = [
   {
-    name: '5 ore',
+    name: '5 ore / 3 lei',
     value: 18000000,
     cost: '3,00 lei',
   },
   {
-    name: '8 ore',
+    name: '8 ore / 20 lei',
     value: 28800000,
     cost: '20,00 lei',
   },
   {
-    name: '12 ore',
+    name: '12 ore / 30 lei',
     value: 43200000,
     cost: '30,00 lei',
   },
   {
-    name: '24 ore',
+    name: '24 ore / 40 lei',
     value: 86400000,
     cost: '40,00 lei',
   },
   {
-    name: '4 zile',
+    name: '4 zile / 100 lei',
     value: 345600000,
     cost: '100,00 lei',
   },
   {
-    name: '7 zile',
+    name: '7 zile / 150 lei',
     value: 604800000,
     cost: '150,00 lei',
   },
   {
-    name: '1 lună',
+    name: '1 lună / 350 lei',
     value: 2419200000,
     cost: '350,00 lei',
   },
