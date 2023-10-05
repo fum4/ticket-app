@@ -220,7 +220,6 @@ export default function Dashboard() {
               <b>
                 {tickets.reduce((acc, { interval }) => {
                   const { cost } = intervals.find(({value }) => value === +interval);
-                  console.log(cost);
 
                   return acc + (+cost.slice(0, cost.indexOf(',')));
                 }, 0)} lei
