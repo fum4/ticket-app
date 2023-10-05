@@ -12,7 +12,7 @@ import {
   Typography
 } from "@mui/material";
 import {useEffect, useRef, useState} from "react";
-import {supabase} from "./supabase.ts";
+import {supabase} from "./supabase.js";
 
 const intervals = [
   {

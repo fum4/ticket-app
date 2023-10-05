@@ -9,7 +9,7 @@ import {
   formControlClasses, Typography,
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { supabase } from './supabase.ts';
+import { supabase } from './supabase.js';
 import ReportDialog from './ReportDialog.jsx';
 import TicketDialog from './TicketDialog.jsx';
 import TicketCard from "./TicketCard.jsx";

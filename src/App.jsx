@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { supabase } from './supabase.ts';
+import { supabase } from './supabase.js';
 import Dashboard from './Dashboard.jsx';
 
 export default function App() {
