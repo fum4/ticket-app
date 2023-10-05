@@ -138,13 +138,13 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
               onChange={(ev) => setLicenseNo(ev.target.value)}
               color={error ? 'error' : 'primary'}
               variant='outlined'
-              label='Nr. înmatriculare'
+              label='Număr de înmatriculare'
               sx={{ [`& .${outlinedInputClasses.root}`]: { background: 'white' }, width: '100%' }}
             />
               <Box display='flex' justifyContent='center' mt={1} height={24}>
                 {error && (
-                  <Typography color='error'>
-                    Nr. de înmatriculare este invalid
+                  <Typography color='error' variant='body2'>
+                    Numărul de înmatriculare este invalid
                   </Typography>
                 )}
               </Box>
