@@ -6,7 +6,8 @@ import {
   TextField,
   outlinedInputClasses,
   textFieldClasses,
-  formControlClasses, Typography,
+  formControlClasses,
+  Typography,
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { supabase } from './supabase.js';
@@ -63,8 +64,6 @@ export default function Dashboard() {
       .select('*')
       .gte('created_at', startDate)
       .lte('created_at', endDate);
-
-    console.log(data);
 
     setTickets(data);
   };
@@ -182,6 +181,7 @@ export default function Dashboard() {
         >
           {filteredActiveTickets.map((ticket) => (
             <TicketCard
+              key={ticket.id}
               ticket={ticket}
               onUpdate={handleTicketUpdate}
               onSessionEnd={handleSessionEnd}
@@ -190,7 +190,6 @@ export default function Dashboard() {
         </Stack>
       </Box>
       {isAddDialogOpen && (
-        // @ts-ignore
         <TicketDialog
           onClose={() => setAddDialogOpen(false)}
           onSuccess={handleTicketAdd}
