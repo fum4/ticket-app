@@ -153,6 +153,7 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
             onClick={handleSubmit}
             variant='contained'
             sx={{ mt: 2 }}
+            disabled={error}
           >
             Confirmă
           </Button>
