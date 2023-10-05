@@ -37,7 +37,7 @@ const ReportDialog = ({ onSubmit, onClose }) => {
       sx={{
         [`& .${dialogClasses.paper}`]: {
           width: 350,
-          height: 400,
+          height: 432,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -63,7 +63,7 @@ const ReportDialog = ({ onSubmit, onClose }) => {
             <Button
               onClick={handleSubmit}
               variant='contained'
-              sx={{ mt: 2 }}
+              sx={{ mt: 6 }}
             >
               Confirmă
             </Button>

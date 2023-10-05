@@ -18,11 +18,24 @@ const defaultTimeInterval = 7200000;
 
 const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
   const licenseNoRef = useRef(null);
+  const hasSubmittedRef = useRef(false);
   const [ timeInterval, setTimeInterval ] = useState(ticket?.interval || intervals[0].value);
   const [ licenseNo, setLicenseNo ] = useState(ticket?.license_no || '');
   const [ error, setError ] = useState(false);
 
+  useEffect(() => {
+    if (licenseNo.length >= 7) {
+      setError(false);
+    } else {
+      if (hasSubmittedRef.current) {
+        setError(true);
+      }
+    }
+  }, [ licenseNo ])
+
   const handleSubmit = async() => {
+    hasSubmittedRef.current = true;
+
     if (licenseNo.length < 7) {
       setError(true);
       licenseNoRef.current?.focus();
@@ -81,7 +94,7 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
       sx={{
         [`& .${dialogClasses.paper}`]: {
           width: 350,
-          height: error ? 435 : 400,
+          height: 430,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -118,22 +131,24 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
               </MenuItem>
             ))}
           </Select>
-          <TextField
-            inputRef={licenseNoRef}
-            value={licenseNo}
-            onChange={(ev) => setLicenseNo(ev.target.value)}
-            color={error ? 'error' : 'primary'}
-            variant='outlined'
-            label='Nr. înmatriculare'
-            sx={{ [`& .${outlinedInputClasses.root}`]: { background: 'white' } }}
-          />
-          {error && (
-            <Box display='flex' justifyContent='center'>
-              <Typography color='error'>
-                Nr. de înmatriculare este invalid
-              </Typography>
-            </Box>
-          )}
+          <Box width={1}>
+            <TextField
+              inputRef={licenseNoRef}
+              value={licenseNo}
+              onChange={(ev) => setLicenseNo(ev.target.value)}
+              color={error ? 'error' : 'primary'}
+              variant='outlined'
+              label='Nr. înmatriculare'
+              sx={{ [`& .${outlinedInputClasses.root}`]: { background: 'white' }, width: '100%' }}
+            />
+              <Box display='flex' justifyContent='center' mt={1} height={24}>
+                {error && (
+                  <Typography color='error'>
+                    Nr. de înmatriculare este invalid
+                  </Typography>
+                )}
+              </Box>
+          </Box>
           <Button
             onClick={handleSubmit}
             variant='contained'
