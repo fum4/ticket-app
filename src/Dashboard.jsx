@@ -17,6 +17,44 @@ import TicketCard from "./TicketCard.jsx";
 
 const utcOffset = 10800000;
 
+const intervals = [
+  {
+    name: '5 ore',
+    value: 18000000,
+    cost: '3,00 lei',
+  },
+  {
+    name: '8 ore',
+    value: 28800000,
+    cost: '20,00 lei',
+  },
+  {
+    name: '12 ore',
+    value: 43200000,
+    cost: '30,00 lei',
+  },
+  {
+    name: '24 ore',
+    value: 86400000,
+    cost: '40,00 lei',
+  },
+  {
+    name: '4 zile',
+    value: 345600000,
+    cost: '100,00 lei',
+  },
+  {
+    name: '7 zile',
+    value: 604800000,
+    cost: '150,00 lei',
+  },
+  {
+    name: '1 lună',
+    value: 2419200000,
+    cost: '350,00 lei',
+  },
+];
+
 export default function Dashboard() {
   const [ isAddDialogOpen, setAddDialogOpen ] = useState(false);
   const [ isReportDialogOpen, setReportDialogOpen ] = useState(false);
@@ -182,6 +220,7 @@ export default function Dashboard() {
         >
           {filteredActiveTickets.map((ticket) => (
             <TicketCard
+              intervals={intervals}
               key={ticket.id}
               ticket={ticket}
               onUpdate={handleTicketUpdate}
@@ -194,6 +233,7 @@ export default function Dashboard() {
         <TicketDialog
           onClose={() => setAddDialogOpen(false)}
           onSuccess={handleTicketAdd}
+          intervals={intervals}
           type='add'
         />
       )}

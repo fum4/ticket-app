@@ -14,40 +14,9 @@ import {
 import {useEffect, useRef, useState} from "react";
 import {supabase} from "./supabase.js";
 
-const intervals = [
-  {
-    name: '5 ore',
-    value: 18000000,
-  },
-  {
-    name: '8 ore',
-    value: 28800000,
-  },
-  {
-    name: '12 ore',
-    value: 43200000,
-  },
-  {
-    name: '24 ore',
-    value: 86400000,
-  },
-  {
-    name: '4 zile',
-    value: 345600000,
-  },
-  {
-    name: '7 zile',
-    value: 604800000,
-  },
-  {
-    name: '1 lună',
-    value: 2419200000,
-  },
-];
-
 const defaultTimeInterval = 7200000;
 
-const TicketDialog = ({ onClose, onSuccess, ticket, type }) => {
+const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
   const licenseNoRef = useRef(null);
   const [ timeInterval, setTimeInterval ] = useState(ticket?.interval || defaultTimeInterval);
   const [ licenseNo, setLicenseNo ] = useState(ticket?.license_no || '');

@@ -5,7 +5,7 @@ import {useEffect, useRef, useState} from "react";
 import {useReactToPrint} from "react-to-print";
 import PrintTemplate from "./PrintTemplate.jsx";
 
-const TicketCard = ({ ticket, onUpdate, onSessionEnd }) => {
+const TicketCard = ({ ticket, intervals, onUpdate, onSessionEnd }) => {
   const [ isUpdateDialogOpen, setUpdateDialogOpen ] = useState(false);
   const [ currentTime, setCurrentTime ] = useState(Date.now());
   const printRef = useRef(null);
@@ -147,7 +147,10 @@ const TicketCard = ({ ticket, onUpdate, onSessionEnd }) => {
         ref={printRef}
         style={{ position: 'absolute', zIndex: -1 }}
       >
-        <PrintTemplate ticket={ticket} />
+        <PrintTemplate
+          ticket={ticket}
+          intervals={intervals}
+        />
       </div>
     </>
   );
