@@ -64,7 +64,7 @@ const TicketCard = ({ ticket, onUpdate, onSessionEnd }) => {
           >
             <b>{ticket.license_no.toUpperCase()}</b>
           </Typography>
-          {!ticket.created_at && (
+          {!ticket.leave_at && (
             <IconButton
               color='primary'
               onClick={() => handlePrint(ticket.id)}
