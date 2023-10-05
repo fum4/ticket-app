@@ -136,6 +136,7 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
               inputRef={licenseNoRef}
               value={licenseNo}
               onChange={(ev) => setLicenseNo(ev.target.value)}
+              onKeyDown={(ev) => ev.key === 'Enter' && handleSubmit()}
               color={error ? 'error' : 'primary'}
               variant='outlined'
               label='Număr de înmatriculare'
