@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useRef, useEffect, useState} from "react";
 import {
   Stack,
   Button,
@@ -7,13 +7,23 @@ import {
   outlinedInputClasses,
   textFieldClasses,
   formControlClasses,
-  Typography,
+  Typography, IconButton,
 } from '@mui/material';
+import PrintIcon from "@mui/icons-material/Print";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { supabase } from './supabase.js';
 import ReportDialog from './ReportDialog.jsx';
 import TicketDialog from './TicketDialog.jsx';
 import TicketCard from "./TicketCard.jsx";
+import dayjs from "./dayjs";
+import {useReactToPrint} from "react-to-print";
 
 const utcOffset = 10800000;
 
@@ -75,13 +85,22 @@ const intervals = [
   },
 ];
 
+const dateFormat = 'DD.MM.YYYY - HH:mm';
+
 export default function Dashboard() {
+  const reportsRef = useRef();
   const [ isAddDialogOpen, setAddDialogOpen ] = useState(false);
   const [ isReportDialogOpen, setReportDialogOpen ] = useState(false);
   const [ tickets, setTickets ] = useState([]);
+  const [ reports, setReports ] = useState([]);
+  const [ reportsInterval, setReportsInterval ] = useState({});
   const [ searchKeyword, setSearchKeyword ] = useState('');
   const [ filteredActiveTickets, setFilteredActiveTickets ] = useState(tickets);
   const [ showReports, setShowReports ] = useState(false);
+
+  const handlePrintReport = useReactToPrint({
+    content: () => reportsRef?.current
+  });
 
   useEffect(() => {
     (async() => {
@@ -123,7 +142,8 @@ export default function Dashboard() {
       .gte('created_at', startDate)
       .lte('created_at', endDate);
 
-    setTickets(data);
+    setReports(data);
+    setReportsInterval({ startDate, endDate });
   };
 
   const handleSessionEnd = async(ticketId) => {
@@ -206,6 +226,7 @@ export default function Dashboard() {
         display='flex'
         alignItems='center'
         flexDirection='column'
+        width={1}
         sx={{ overflow: 'hidden' }}
       >
         <Box
@@ -226,51 +247,113 @@ export default function Dashboard() {
             </Typography>
           )}
         </Box>
-        {showReports && (
-          <Box
-            display='flex'
-            gap={1}
-            sx={{ color: 'black' }}
-            pt={3.5}
-            pb={3.5}
-          >
-            <Typography>
-              Total:
-            </Typography>
-            <Typography>
-              <b>
-                {tickets.reduce((acc, { interval }) => {
-                  const { cost } = intervals.find(({value }) => value === +interval);
+        {showReports ? (
+          <>
+            <Box
+              display='flex'
+              alignItems='center'
+              pt={3.5}
+              pb={3.5}
+              sx={{ color: 'black' }}
+              gap={8}
+            >
+              <Box
+                display='flex'
+                gap={1}
+              >
+                <Typography>
+                  Interval:
+                </Typography>
+                <Typography>
+                  <b>{dayjs(reportsInterval.startDate).format('DD.MM.YYYY')}</b>
+                  <span> - </span>
+                  <b>{dayjs(reportsInterval.endDate).format('DD.MM.YYYY')}</b>
+                </Typography>
+              </Box>
+              <Box
+                display='flex'
+                gap={1}
+              >
+                <Typography>
+                  Total încasări:
+                </Typography>
+                <Typography>
+                  <b>
+                    {reports.reduce((acc, { interval }) => {
+                      const { cost } = intervals.find(({value }) => value === +interval);
 
-                  return acc + (+cost.slice(0, cost.indexOf(',')));
-                }, 0)} lei
-              </b>
-            </Typography>
-          </Box>
+                      return acc + (+cost.slice(0, cost.indexOf(',')));
+                    }, 0)} lei
+                  </b>
+                </Typography>
+              </Box>
+              <IconButton
+                color='primary'
+                onClick={handlePrintReport}
+                sx={{ height: 48, width: 48 }}
+              >
+                <PrintIcon />
+              </IconButton>
+            </Box>
+            <Box
+              width={900}
+              pb={10}
+              sx={{ overflow: 'scroll' }}
+            >
+              <TableContainer ref={reportsRef} component={Paper}>
+                <Table aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="left"><b>Nr.</b></TableCell>
+                      <TableCell align="left"><b>Nr. înmatriculare</b></TableCell>
+                      <TableCell align="left"><b>Data și ora intrării</b></TableCell>
+                      <TableCell align="left"><b>Data și ora ieșirii</b></TableCell>
+                      <TableCell align="right"><b>Tarif</b></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {reports.map((report) => (
+                      <TableRow
+                        key={report.id}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      >
+                        <TableCell component="th" scope="row" align="left" sx={{ width: 70 }}>{report.id}</TableCell>
+                        <TableCell align="left">{report.license_no}</TableCell>
+                        <TableCell align="left">{dayjs(new Date(report.created_at)).format(dateFormat)}</TableCell>
+                        <TableCell align="left">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateFormat)}</TableCell>
+                        <TableCell align="right" sx={{ width: 105 }}>{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </>
+        ) : (
+          <Stack
+            spacing={5}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: 'column',
+              overflow: 'scroll',
+              whiteSpace: 'nowrap',
+              pt: showReports ? 0 : 10,
+              pb: 10,
+              width: '100vw'
+            }}
+          >
+            {filteredActiveTickets.map((ticket) => (
+              <TicketCard
+                intervals={intervals}
+                key={ticket.id}
+                ticket={ticket}
+                onUpdate={handleTicketUpdate}
+                onSessionEnd={handleSessionEnd}
+              />
+            ))}
+          </Stack>
         )}
-        <Stack
-          spacing={5}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'column',
-            overflow: 'scroll',
-            whiteSpace: 'nowrap',
-            pt: showReports ? 0 : 10,
-            pb: 10,
-            width: '100vw'
-          }}
-        >
-          {filteredActiveTickets.map((ticket) => (
-            <TicketCard
-              intervals={intervals}
-              key={ticket.id}
-              ticket={ticket}
-              onUpdate={handleTicketUpdate}
-              onSessionEnd={handleSessionEnd}
-            />
-          ))}
-        </Stack>
       </Box>
       {isAddDialogOpen && (
         <TicketDialog

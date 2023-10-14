@@ -67,7 +67,7 @@ const TicketCard = ({ ticket, intervals, onUpdate, onSessionEnd }) => {
           {!ticket.leave_at && (
             <IconButton
               color='primary'
-              onClick={() => handlePrint(ticket.id)}
+              onClick={handlePrint}
               sx={{ height: 48, width: 48 }}
             >
               <PrintIcon />
