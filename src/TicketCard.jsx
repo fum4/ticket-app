@@ -139,6 +139,7 @@ const TicketCard = ({ ticket, intervals, onUpdate, onSessionEnd }) => {
         <TicketDialog
           onClose={() => setUpdateDialogOpen(false)}
           onSuccess={onUpdate}
+          intervals={intervals}
           ticket={ticket}
           type='modify'
         />

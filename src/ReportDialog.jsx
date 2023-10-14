@@ -6,14 +6,11 @@ import {
   Typography,
   dialogClasses,
 } from "@mui/material";
-import dayjs from 'dayjs';
-import utc from 'dayjs-plugin-utc';
+import dayjs from './dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {useState} from "react";
-
-dayjs.extend(utc);
 
 const ReportDialog = ({ onSubmit, onClose }) => {
   const [ startDate, setStartDate ] = useState(dayjs(Date.now()));
