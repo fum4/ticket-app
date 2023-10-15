@@ -20,7 +20,7 @@ const PrintTemplate = ({ ticket, intervals }) => {
       </Typography>
       <Box display='flex' gap={2}>
         <Typography>Serie / număr:</Typography>
-        <Typography><b>4678777</b> / <b>{ticket.id}</b></Typography>
+        <Typography><b>APK</b> / <b>{ticket.id}</b></Typography>
       </Box>
       <br />
       <hr />
