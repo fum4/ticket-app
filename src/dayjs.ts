@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+// @ts-ignore
 import utc from 'dayjs-plugin-utc';
 import timezone from 'dayjs/plugin/timezone';
 
