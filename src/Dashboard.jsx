@@ -163,6 +163,8 @@ export default function Dashboard() {
     if (sort === 'recent') {
       ticketsScrollRef.current?.scrollTo(0, 0);
     }
+
+    setSearchKeyword('');
   };
 
   const handleTicketUpdate = (data) => {
@@ -183,6 +185,7 @@ export default function Dashboard() {
     setReports(data);
     setReportsInterval({ startDate, endDate });
     setIsLoading(false);
+    setSearchKeyword('');
   };
 
   const handleSessionEnd = async(ticketId) => {
