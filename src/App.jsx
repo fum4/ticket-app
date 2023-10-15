@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Auth } from '@supabase/auth-ui-react'
+import { Toaster } from 'sonner';
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from './supabase.js';
 import Dashboard from './Dashboard.jsx';
@@ -35,6 +36,17 @@ export default function App() {
   }
 
   return (
-    <Dashboard />
+    <>
+      <Toaster
+        position='top-right'
+        duration='10000'
+        closeButton
+        richColors
+        toastOptions={{
+          style: { marginTop: '57px' }
+        }}
+      />
+      <Dashboard />
+    </>
   );
 }

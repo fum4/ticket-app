@@ -3,22 +3,31 @@ import {
   Stack,
   Button,
   Box,
+  Container,
   TextField,
   outlinedInputClasses,
   textFieldClasses,
   formControlClasses,
-  Typography, IconButton,
+  Typography,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import PrintIcon from "@mui/icons-material/Print";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { supabase } from './supabase.js';
 import ReportDialog from './ReportDialog.jsx';
 import TicketDialog from './TicketDialog.jsx';
@@ -90,6 +99,7 @@ const dateDisplayFormat = 'DD.MM.YYYY - HH:mm';
 const dateDbFormat = 'YYYY-MM-DDTHH:mm:ss';
 
 export default function Dashboard() {
+  const ticketsScrollRef = useRef();
   const reportsRef = useRef();
   const [ isAddDialogOpen, setAddDialogOpen ] = useState(false);
   const [ isReportDialogOpen, setReportDialogOpen ] = useState(false);
@@ -99,10 +109,16 @@ export default function Dashboard() {
   const [ searchKeyword, setSearchKeyword ] = useState('');
   const [ filteredActiveTickets, setFilteredActiveTickets ] = useState(tickets);
   const [ showReports, setShowReports ] = useState(false);
+  const [ isLoading, setIsLoading ] = useState(false);
+  const [ sort, setSort ] = useState('expiration');
 
   const handlePrintReport = useReactToPrint({
     content: () => reportsRef?.current
   });
+
+  useEffect(() => {
+    ticketsScrollRef.current?.scrollTo(0, 0);
+  }, [ sort ]);
 
   useEffect(() => {
     (async() => {
@@ -124,11 +140,29 @@ export default function Dashboard() {
       tickets.filter(({ license_no }) => (
         license_no.toLowerCase().includes(searchKeyword.toLowerCase())
       ))
+        .sort((a, b) => {
+          if (sort === 'expiration') {
+            const currentTime = Date.now();
+            const createdAtA = new Date(a.created_at).getTime();
+            const createdAtB = new Date(b.created_at).getTime();
+
+            const remainingTimeA = createdAtA + a.interval - currentTime;
+            const remainingTimeB = createdAtB + b.interval - currentTime;
+
+            return remainingTimeA > remainingTimeB ? 1 : -1;
+          }
+
+          return a.created_at > b.created_at ? -1 : 1;
+        })
     ));
-  }, [ tickets, searchKeyword ]);
+  }, [ tickets, searchKeyword, sort ]);
 
   const handleTicketAdd = (data) => {
     setTickets((activeTickets) => ([ data, ...activeTickets ]));
+
+    if (sort === 'recent') {
+      ticketsScrollRef.current?.scrollTo(0, 0);
+    }
   };
 
   const handleTicketUpdate = (data) => {
@@ -136,16 +170,19 @@ export default function Dashboard() {
   }
 
   const handleReports = async(startDate, endDate) => {
+    setIsLoading(true);
     setShowReports(true);
 
     const { data } = await supabase
       .from('tickets')
       .select('*')
       .gte('created_at', startDate.format(dateDbFormat))
-      .lte('created_at', endDate.format(dateDbFormat));
+      .lte('created_at', endDate.format(dateDbFormat))
+      .order('created_at');
 
     setReports(data);
     setReportsInterval({ startDate, endDate });
+    setIsLoading(false);
   };
 
   const handleSessionEnd = async(ticketId) => {
@@ -163,77 +200,78 @@ export default function Dashboard() {
   return (
     <div className='flex h-screen bg-slate-100 flex flex-col items-center'>
       <Box
-        display='flex'
-        alignItems='center'
-        justifyContent='space-between'
         width={1}
-        gap={2}
         px={10}
         py={2}
-        height='72px'
+        minHeight='72px'
         className='bg-black'
       >
-        {showReports? (
-          <>
-            <Button
-              onClick={() => {
-                setShowReports(false);
-                setReportsInterval({})
-                setReports([]);
-              }}
-              variant='contained'
-              sx={{ pl: 1 }}
-            >
-              <ChevronLeftIcon />
-              Înapoi
-            </Button>
-            <Button
-              onClick={() => setReportDialogOpen(true)}
-              variant='outlined'
-            >
-              Modifică intervalul
-            </Button>
-          </>
-        ) : (
-          <>
-            <TextField
-              value={searchKeyword}
-              label='Filtrează'
-              size='small'
-              onChange={(ev) => setSearchKeyword(ev.target.value)}
-              sx={{
-                [`&.${formControlClasses.root}.${textFieldClasses.root}`]: {
-                  mb: 0,
-                },
-                [`& .${outlinedInputClasses.root}`]: {
-                  width: 272,
-                  background: 'white'
-                },
-                mb: 1.5
-              }}
-            />
-            <Box display='flex' gap={2}>
+        <Container
+          maxWidth='xl'
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+          }}
+        >
+          {showReports? (
+            <>
+              <Button
+                onClick={() => {
+                  setShowReports(false);
+                  setReportsInterval({})
+                  setReports([]);
+                }}
+                variant='contained'
+                sx={{ pl: 1 }}
+              >
+                <ChevronLeftIcon />
+                Înapoi
+              </Button>
               <Button
                 onClick={() => setReportDialogOpen(true)}
                 variant='outlined'
               >
-                Raport
+                Modifică intervalul
               </Button>
-              <Button
-                onClick={() => setAddDialogOpen(true)}
-                variant='contained'
-                sx={{ width: 'fit-content' }}
-              >
-                Adaugă
-              </Button>
-            </Box>
-          </>
-        )}
-        <ReportDialog
-          open={isReportDialogOpen}
-          onClose={() => setReportDialogOpen(false)}
-          onSubmit={handleReports}
-        />
+            </>
+          ) : (
+            <>
+              <TextField
+                value={searchKeyword}
+                label='Filtrează'
+                size='small'
+                onChange={(ev) => setSearchKeyword(ev.target.value)}
+                sx={{
+                  [`&.${formControlClasses.root}.${textFieldClasses.root}`]: {
+                    mb: 0,
+                  },
+                  [`& .${outlinedInputClasses.root}`]: {
+                    width: 272,
+                    background: 'white'
+                  },
+                  mb: 1.5
+                }}
+              />
+              <Box display='flex' gap={2}>
+                <Button
+                  onClick={() => setReportDialogOpen(true)}
+                  variant='outlined'
+                >
+                  Raport
+                </Button>
+                <Button
+                  onClick={() => setAddDialogOpen(true)}
+                  variant='contained'
+                  sx={{ width: 'fit-content' }}
+                >
+                  Adaugă
+                </Button>
+              </Box>
+            </>
+          )}
+        </Container>
       </Box>
       <Box
         display='flex'
@@ -251,144 +289,194 @@ export default function Dashboard() {
           className='bg-slate-200'
         >
           {showReports ? (
-            <Typography variant='h4'>
-              Raport
-            </Typography>
+            <Box display='flex' alignItems='center' gap={2} position='relative'>
+              <AssessmentIcon sx={{ position: 'absolute', left: -40 }} />
+              <Typography variant='h4'>
+                Raport
+              </Typography>
+            </Box>
           ) : (
-            <Typography variant='h4'>
-              Tichete active
-            </Typography>
+            <Box display='flex' alignItems='center' gap={2} position='relative'>
+              <ConfirmationNumberIcon sx={{ position: 'absolute', left: -40 }} />
+              <Typography variant='h4'>
+                Tichete
+              </Typography>
+            </Box>
           )}
         </Box>
-        {showReports ? (
-          reports.length ? (
-            <>
-              <Box
-                display='flex'
-                alignItems='center'
-                pt={3.5}
-                pb={3.5}
-                sx={{ color: 'black' }}
-                gap={8}
-              >
+        {isLoading ? (
+          <Box
+            display='flex'
+            flexDirection='column'
+            justifyContent='center'
+            alignItems='center'
+            height={1}
+            gap={3}
+            mt={30}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          showReports ? (
+            reports.length ? (
+              <>
                 <Box
                   display='flex'
-                  gap={1}
+                  alignItems='center'
+                  pt={3.5}
+                  pb={3.5}
+                  sx={{ color: 'black' }}
+                  gap={8}
                 >
-                  <Typography>
-                    Interval:
-                  </Typography>
+                  <Box
+                    display='flex'
+                    gap={1}
+                  >
+                    <Typography>
+                      Interval:
+                    </Typography>
+                    <Typography>
+                      <b>{dayjs(reportsInterval.startDate).format('DD.MM.YYYY')}</b>
+                      <span> - </span>
+                      <b>{dayjs(reportsInterval.endDate).format('DD.MM.YYYY')}</b>
+                    </Typography>
+                  </Box>
+                  <Box
+                    display='flex'
+                    gap={1}
+                  >
+                    <Typography>
+                      Total încasări:
+                    </Typography>
+                    <Typography>
+                      <b>
+                        {reports.reduce((acc, { interval }) => {
+                          const { cost } = intervals.find(({value }) => value === +interval);
+
+                          return acc + (+cost.slice(0, cost.indexOf(',')));
+                        }, 0)} lei
+                      </b>
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    color='primary'
+                    onClick={handlePrintReport}
+                    sx={{ height: 48, width: 48 }}
+                  >
+                    <PrintIcon />
+                  </IconButton>
+                </Box>
+                <Box
+                  width={900}
+                  pb={10}
+                  sx={{ overflow: 'scroll' }}
+                >
+                  <TableContainer ref={reportsRef} component={Paper}>
+                    <Table aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="left"><b>Nr.</b></TableCell>
+                          <TableCell align="left"><b>Nr. înmatriculare</b></TableCell>
+                          <TableCell align="left"><b>Data și ora intrării</b></TableCell>
+                          <TableCell align="left"><b>Data și ora ieșirii</b></TableCell>
+                          <TableCell align="right"><b>Tarif</b></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {reports.map((report) => (
+                          <TableRow
+                            key={report.id}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                          >
+                            <TableCell component="th" scope="row" align="left" sx={{ width: 70 }}>{report.id}</TableCell>
+                            <TableCell align="left">{report.license_no}</TableCell>
+                            <TableCell align="left">{dayjs(new Date(report.created_at)).format(dateDisplayFormat)}</TableCell>
+                            <TableCell align="left">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateDisplayFormat)}</TableCell>
+                            <TableCell align="right" sx={{ width: 105 }}>{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              </>
+            ) : (
+              <Box
+                display='flex'
+                flexDirection='column'
+                alignItems='center'
+                gap={3}
+                pt={27}
+                sx={{ color: 'black' }}
+              >
+                <Typography variant='h6'>
+                  Nu există date pentru intervalul selectat
+                </Typography>
+                <Box display='flex' gap={1}>
+                  <EventBusyIcon color='error' />
                   <Typography>
                     <b>{dayjs(reportsInterval.startDate).format('DD.MM.YYYY')}</b>
                     <span> - </span>
                     <b>{dayjs(reportsInterval.endDate).format('DD.MM.YYYY')}</b>
                   </Typography>
                 </Box>
-                <Box
-                  display='flex'
-                  gap={1}
-                >
-                  <Typography>
-                    Total încasări:
-                  </Typography>
-                  <Typography>
-                    <b>
-                      {reports.reduce((acc, { interval }) => {
-                        const { cost } = intervals.find(({value }) => value === +interval);
-
-                        return acc + (+cost.slice(0, cost.indexOf(',')));
-                      }, 0)} lei
-                    </b>
-                  </Typography>
-                </Box>
-                <IconButton
-                  color='primary'
-                  onClick={handlePrintReport}
-                  sx={{ height: 48, width: 48 }}
-                >
-                  <PrintIcon />
-                </IconButton>
               </Box>
-              <Box
-                width={900}
-                pb={10}
-                sx={{ overflow: 'scroll' }}
-              >
-                <TableContainer ref={reportsRef} component={Paper}>
-                  <Table aria-label="simple table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align="left"><b>Nr.</b></TableCell>
-                        <TableCell align="left"><b>Nr. înmatriculare</b></TableCell>
-                        <TableCell align="left"><b>Data și ora intrării</b></TableCell>
-                        <TableCell align="left"><b>Data și ora ieșirii</b></TableCell>
-                        <TableCell align="right"><b>Tarif</b></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {reports.map((report) => (
-                        <TableRow
-                          key={report.id}
-                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell component="th" scope="row" align="left" sx={{ width: 70 }}>{report.id}</TableCell>
-                          <TableCell align="left">{report.license_no}</TableCell>
-                          <TableCell align="left">{dayjs(new Date(report.created_at)).format(dateDisplayFormat)}</TableCell>
-                          <TableCell align="left">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateDisplayFormat)}</TableCell>
-                          <TableCell align="right" sx={{ width: 105 }}>{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            </>
+            )
           ) : (
             <Box
               display='flex'
               flexDirection='column'
               alignItems='center'
-              gap={3}
-              pt={10}
-              sx={{ color: 'black' }}
+              position='relative'
+              sx={{ overflow: 'hidden' }}
             >
-              <Typography variant='h6'>
-                Nu există date pentru intervalul selectat
-              </Typography>
-              <Box display='flex' gap={1}>
-                <EventBusyIcon color='error' />
-                <Typography>
-                  <b>{dayjs(reportsInterval.startDate).format('DD.MM.YYYY')}</b>
-                  <span> - </span>
-                  <b>{dayjs(reportsInterval.endDate).format('DD.MM.YYYY')}</b>
-                </Typography>
+              <Box
+                pb={2}
+                mt={5}
+                width={300}
+                sx={{ borderBottom: '1px solid #dadddf' }}
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="sort">Sortează după</InputLabel>
+                  <Select
+                    labelId="sort"
+                    id="sort"
+                    value={sort}
+                    label="Sortează după"
+                    onChange={(e) => setSort(e.target.value)}
+                    sx={{ background: '#fff' }}
+                  >
+                    <MenuItem value='recent'>Cele mai recente</MenuItem>
+                    <MenuItem value='expiration'>Ora expirării</MenuItem>
+                  </Select>
+                </FormControl>
               </Box>
+              <Stack
+                ref={ticketsScrollRef}
+                spacing={5}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  overflow: 'scroll',
+                  whiteSpace: 'nowrap',
+                  pt: showReports ? 0 : 3.5,
+                  pb: 10,
+                  width: '100vw'
+                }}
+              >
+                {filteredActiveTickets.map((ticket) => (
+                  <TicketCard
+                    intervals={intervals}
+                    key={ticket.id}
+                    ticket={ticket}
+                    onUpdate={handleTicketUpdate}
+                    onSessionEnd={handleSessionEnd}
+                  />
+                ))}
+              </Stack>
             </Box>
           )
-        ) : (
-          <Stack
-            spacing={5}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: 'column',
-              overflow: 'scroll',
-              whiteSpace: 'nowrap',
-              pt: showReports ? 0 : 10,
-              pb: 10,
-              width: '100vw'
-            }}
-          >
-            {filteredActiveTickets.map((ticket) => (
-              <TicketCard
-                intervals={intervals}
-                key={ticket.id}
-                ticket={ticket}
-                onUpdate={handleTicketUpdate}
-                onSessionEnd={handleSessionEnd}
-              />
-            ))}
-          </Stack>
         )}
       </Box>
       {isAddDialogOpen && (
@@ -397,6 +485,12 @@ export default function Dashboard() {
           onSuccess={handleTicketAdd}
           intervals={intervals}
           type='add'
+        />
+      )}
+      {isReportDialogOpen && (
+        <ReportDialog
+          onClose={() => setReportDialogOpen(false)}
+          onSubmit={handleReports}
         />
       )}
     </div>

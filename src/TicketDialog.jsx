@@ -11,6 +11,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
+import { toast } from 'sonner';
 import {useEffect, useRef, useState} from "react";
 import {supabase} from "./supabase.js";
 
@@ -72,6 +73,10 @@ const TicketDialog = ({ intervals, onClose, onSuccess, ticket, type }) => {
 
         if (ticket) {
           onSuccess(ticket);
+
+          toast.success(`Tichet ${type === 'add' ? 'adăugat' : 'modificat'} (${payload.license_no})`);
+        } else {
+          toast.error('Tichetul nu a putut fi adăugat');
         }
       }
 

@@ -4,6 +4,7 @@ import TicketDialog from "./TicketDialog.jsx";
 import {useEffect, useRef, useState} from "react";
 import {useReactToPrint} from "react-to-print";
 import PrintTemplate from "./PrintTemplate.jsx";
+import {toast} from "sonner";
 
 const TicketCard = ({ ticket, intervals, onUpdate, onSessionEnd }) => {
   const [ isUpdateDialogOpen, setUpdateDialogOpen ] = useState(false);
@@ -126,7 +127,10 @@ const TicketCard = ({ ticket, intervals, onUpdate, onSessionEnd }) => {
               Modifică
             </Button>
             <Button
-              onClick={() => onSessionEnd(ticket.id)}
+              onClick={() => {
+                onSessionEnd(ticket.id);
+                toast.success(`Tichet finalizat (${ticket.license_no})`);
+              }}
               sx={{ mt: 1.5 }}
               variant='outlined'
             >
