@@ -110,7 +110,7 @@ export default function Dashboard() {
   const [ filteredActiveTickets, setFilteredActiveTickets ] = useState(tickets);
   const [ showReports, setShowReports ] = useState(false);
   const [ isLoading, setIsLoading ] = useState(false);
-  const [ sort, setSort ] = useState('expiration');
+  const [ sort, setSort ] = useState(localStorage.getItem('sortBy') || 'recent');
 
   const handlePrintReport = useReactToPrint({
     content: () => reportsRef?.current
@@ -443,7 +443,10 @@ export default function Dashboard() {
                     id="sort"
                     value={sort}
                     label="Sortează după"
-                    onChange={(e) => setSort(e.target.value)}
+                    onChange={(e) => {
+                      setSort(e.target.value);
+                      localStorage.setItem('sortBy', e.target.value);
+                    }}
                     sx={{ background: '#fff' }}
                   >
                     <MenuItem value='recent'>Cele mai recente</MenuItem>
