@@ -7,29 +7,26 @@ import {
   dialogClasses,
 } from "@mui/material";
 import dayjs from './dayjs';
+import 'dayjs/locale/ro'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {useState} from "react";
 
-const ReportDialog = ({ onSubmit, onClose }) => {
+const ReportDialog = ({ onSubmit, onClose, open }) => {
   const [ startDate, setStartDate ] = useState(dayjs(Date.now()));
   const [ endDate, setEndDate ] = useState(dayjs(Date.now()));
 
   const handleSubmit = async() => {
     if (startDate && endDate) {
-      onSubmit(
-        dayjs(startDate).startOf('day').utcOffset(180).toISOString(),
-        dayjs(endDate).endOf('day').utcOffset(180).toISOString()
-      );
-
+      onSubmit(startDate.startOf('day'), endDate.endOf('day'));
       onClose();
     }
   };
 
   return (
     <Dialog
-      open
+      open={open}
       onClose={onClose}
       sx={{
         [`& .${dialogClasses.paper}`]: {
@@ -41,7 +38,7 @@ const ReportDialog = ({ onSubmit, onClose }) => {
         },
       }}
     >
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ro'>
         <Box width={250} display='flex' flexDirection='column' justifyContent='center'>
           <Typography variant='h5' sx={{ mb: 4 }}>
             Extrage raport
@@ -50,12 +47,12 @@ const ReportDialog = ({ onSubmit, onClose }) => {
             <DatePicker
               label="De la"
               value={startDate}
-              onChange={(value) => setStartDate(value)}
+              onChange={(value) => setStartDate(dayjs.tz(value))}
             />
             <DatePicker
               label="Până la"
               value={endDate}
-              onChange={(value) => setEndDate(value)}
+              onChange={(value) => setEndDate(dayjs.tz(value))}
             />
             <Button
               onClick={handleSubmit}

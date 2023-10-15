@@ -18,6 +18,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
 import { supabase } from './supabase.js';
 import ReportDialog from './ReportDialog.jsx';
 import TicketDialog from './TicketDialog.jsx';
@@ -85,7 +86,8 @@ const intervals = [
   },
 ];
 
-const dateFormat = 'DD.MM.YYYY - HH:mm';
+const dateDisplayFormat = 'DD.MM.YYYY - HH:mm';
+const dateDbFormat = 'YYYY-MM-DDTHH:mm:ss';
 
 export default function Dashboard() {
   const reportsRef = useRef();
@@ -139,8 +141,8 @@ export default function Dashboard() {
     const { data } = await supabase
       .from('tickets')
       .select('*')
-      .gte('created_at', startDate)
-      .lte('created_at', endDate);
+      .gte('created_at', startDate.format(dateDbFormat))
+      .lte('created_at', endDate.format(dateDbFormat));
 
     setReports(data);
     setReportsInterval({ startDate, endDate });
@@ -172,14 +174,26 @@ export default function Dashboard() {
         className='bg-black'
       >
         {showReports? (
-          <Button
-            onClick={() => setShowReports(false)}
-            variant='contained'
-            sx={{ pl: 1 }}
-          >
-            <ChevronLeftIcon />
-            Înapoi
-          </Button>
+          <>
+            <Button
+              onClick={() => {
+                setShowReports(false);
+                setReportsInterval({})
+                setReports([]);
+              }}
+              variant='contained'
+              sx={{ pl: 1 }}
+            >
+              <ChevronLeftIcon />
+              Înapoi
+            </Button>
+            <Button
+              onClick={() => setReportDialogOpen(true)}
+              variant='outlined'
+            >
+              Modifică intervalul
+            </Button>
+          </>
         ) : (
           <>
             <TextField
@@ -215,12 +229,11 @@ export default function Dashboard() {
             </Box>
           </>
         )}
-        {isReportDialogOpen && (
-          <ReportDialog
-            onClose={() => setReportDialogOpen(false)}
-            onSubmit={handleReports}
-          />
-        )}
+        <ReportDialog
+          open={isReportDialogOpen}
+          onClose={() => setReportDialogOpen(false)}
+          onSubmit={handleReports}
+        />
       </Box>
       <Box
         display='flex'
@@ -248,87 +261,110 @@ export default function Dashboard() {
           )}
         </Box>
         {showReports ? (
-          <>
-            <Box
-              display='flex'
-              alignItems='center'
-              pt={3.5}
-              pb={3.5}
-              sx={{ color: 'black' }}
-              gap={8}
-            >
+          reports.length ? (
+            <>
               <Box
                 display='flex'
-                gap={1}
+                alignItems='center'
+                pt={3.5}
+                pb={3.5}
+                sx={{ color: 'black' }}
+                gap={8}
               >
-                <Typography>
-                  Interval:
-                </Typography>
+                <Box
+                  display='flex'
+                  gap={1}
+                >
+                  <Typography>
+                    Interval:
+                  </Typography>
+                  <Typography>
+                    <b>{dayjs(reportsInterval.startDate).format('DD.MM.YYYY')}</b>
+                    <span> - </span>
+                    <b>{dayjs(reportsInterval.endDate).format('DD.MM.YYYY')}</b>
+                  </Typography>
+                </Box>
+                <Box
+                  display='flex'
+                  gap={1}
+                >
+                  <Typography>
+                    Total încasări:
+                  </Typography>
+                  <Typography>
+                    <b>
+                      {reports.reduce((acc, { interval }) => {
+                        const { cost } = intervals.find(({value }) => value === +interval);
+
+                        return acc + (+cost.slice(0, cost.indexOf(',')));
+                      }, 0)} lei
+                    </b>
+                  </Typography>
+                </Box>
+                <IconButton
+                  color='primary'
+                  onClick={handlePrintReport}
+                  sx={{ height: 48, width: 48 }}
+                >
+                  <PrintIcon />
+                </IconButton>
+              </Box>
+              <Box
+                width={900}
+                pb={10}
+                sx={{ overflow: 'scroll' }}
+              >
+                <TableContainer ref={reportsRef} component={Paper}>
+                  <Table aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left"><b>Nr.</b></TableCell>
+                        <TableCell align="left"><b>Nr. înmatriculare</b></TableCell>
+                        <TableCell align="left"><b>Data și ora intrării</b></TableCell>
+                        <TableCell align="left"><b>Data și ora ieșirii</b></TableCell>
+                        <TableCell align="right"><b>Tarif</b></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {reports.map((report) => (
+                        <TableRow
+                          key={report.id}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row" align="left" sx={{ width: 70 }}>{report.id}</TableCell>
+                          <TableCell align="left">{report.license_no}</TableCell>
+                          <TableCell align="left">{dayjs(new Date(report.created_at)).format(dateDisplayFormat)}</TableCell>
+                          <TableCell align="left">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateDisplayFormat)}</TableCell>
+                          <TableCell align="right" sx={{ width: 105 }}>{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </>
+          ) : (
+            <Box
+              display='flex'
+              flexDirection='column'
+              alignItems='center'
+              gap={3}
+              pt={10}
+              sx={{ color: 'black' }}
+            >
+              <Typography variant='h6'>
+                Nu există date pentru intervalul selectat
+              </Typography>
+              <Box display='flex' gap={1}>
+                <EventBusyIcon color='error' />
                 <Typography>
                   <b>{dayjs(reportsInterval.startDate).format('DD.MM.YYYY')}</b>
                   <span> - </span>
                   <b>{dayjs(reportsInterval.endDate).format('DD.MM.YYYY')}</b>
                 </Typography>
               </Box>
-              <Box
-                display='flex'
-                gap={1}
-              >
-                <Typography>
-                  Total încasări:
-                </Typography>
-                <Typography>
-                  <b>
-                    {reports.reduce((acc, { interval }) => {
-                      const { cost } = intervals.find(({value }) => value === +interval);
-
-                      return acc + (+cost.slice(0, cost.indexOf(',')));
-                    }, 0)} lei
-                  </b>
-                </Typography>
-              </Box>
-              <IconButton
-                color='primary'
-                onClick={handlePrintReport}
-                sx={{ height: 48, width: 48 }}
-              >
-                <PrintIcon />
-              </IconButton>
             </Box>
-            <Box
-              width={900}
-              pb={10}
-              sx={{ overflow: 'scroll' }}
-            >
-              <TableContainer ref={reportsRef} component={Paper}>
-                <Table aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="left"><b>Nr.</b></TableCell>
-                      <TableCell align="left"><b>Nr. înmatriculare</b></TableCell>
-                      <TableCell align="left"><b>Data și ora intrării</b></TableCell>
-                      <TableCell align="left"><b>Data și ora ieșirii</b></TableCell>
-                      <TableCell align="right"><b>Tarif</b></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {reports.map((report) => (
-                      <TableRow
-                        key={report.id}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      >
-                        <TableCell component="th" scope="row" align="left" sx={{ width: 70 }}>{report.id}</TableCell>
-                        <TableCell align="left">{report.license_no}</TableCell>
-                        <TableCell align="left">{dayjs(new Date(report.created_at)).format(dateFormat)}</TableCell>
-                        <TableCell align="left">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateFormat)}</TableCell>
-                        <TableCell align="right" sx={{ width: 105 }}>{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          </>
+          )
         ) : (
           <Stack
             spacing={5}
