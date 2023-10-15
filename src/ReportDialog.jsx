@@ -13,7 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {useState} from "react";
 
-const ReportDialog = ({ onSubmit, onClose, open }) => {
+const ReportDialog = ({ onSubmit, onClose }) => {
   const [ startDate, setStartDate ] = useState(dayjs(Date.now()));
   const [ endDate, setEndDate ] = useState(dayjs(Date.now()));
 
@@ -26,7 +26,7 @@ const ReportDialog = ({ onSubmit, onClose, open }) => {
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={onClose}
       sx={{
         [`& .${dialogClasses.paper}`]: {
