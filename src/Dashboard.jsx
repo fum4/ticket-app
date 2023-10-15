@@ -377,8 +377,8 @@ export default function Dashboard() {
                         <TableRow>
                           <TableCell align="left"><b>Nr.</b></TableCell>
                           <TableCell align="left"><b>Nr. înmatriculare</b></TableCell>
-                          <TableCell align="left"><b>Data și ora intrării</b></TableCell>
-                          <TableCell align="left"><b>Data și ora ieșirii</b></TableCell>
+                          <TableCell align="right"><b>Data și ora intrării</b></TableCell>
+                          <TableCell align="right"><b>Data și ora ieșirii</b></TableCell>
                           <TableCell align="right"><b>Tarif</b></TableCell>
                         </TableRow>
                       </TableHead>
@@ -390,9 +390,9 @@ export default function Dashboard() {
                           >
                             <TableCell component="th" scope="row" align="left" sx={{ width: 70 }}>{report.id}</TableCell>
                             <TableCell align="left">{report.license_no}</TableCell>
-                            <TableCell align="left">{dayjs(new Date(report.created_at)).format(dateDisplayFormat)}</TableCell>
-                            <TableCell align="left">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateDisplayFormat)}</TableCell>
-                            <TableCell align="right" sx={{ width: 105 }}>{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
+                            <TableCell align="right">{dayjs(new Date(report.created_at)).format(dateDisplayFormat)}</TableCell>
+                            <TableCell align="right">{dayjs(new Date(new Date(report.created_at).valueOf() + report.interval)).format(dateDisplayFormat)}</TableCell>
+                            <TableCell align="right">{intervals.find(({ value }) => value === report.interval)?.cost}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
